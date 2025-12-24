@@ -15,8 +15,7 @@ A simple script to download music from YouTube playlists locally using Docker an
 
 ## Tips
 
-* If you want to downlaod an album, the link can also be a playlist link which will download the whole playlist.
-* Example, see https://www.youtube.com/watch?v=4oPA8JUttCw&list=PLWnwFAnZO1AHV5_IJOqhidY2iYgcc9ulD
+* If you want to downlaod an album, the link can also be a playlist link which will download the whole playlist. Example, see https://www.youtube.com/watch?v=4oPA8JUttCw&list=PLWnwFAnZO1AHV5_IJOqhidY2iYgcc9ulD
 
 * Sometimes if you have a youtube link, it will also download all the auto play songs as well. To make sure it doesnt, make sure your link has no `&`. Double check its just a video only.
 
