@@ -1,13 +1,38 @@
 #!/bin/bash
-set -uo pipefail
+set -euo pipefail
 
-audio_directory="/audio"
-mkdir -p "$audio_directory"
+JSON_FILE="playlists.json"
+BASE_DIR="/audio"
 
-PLAYLIST_URL="https://www.youtube.com/watch?v=hEDH5lbWlms"
+mkdir -p "$BASE_DIR"
 
-echo "Downloading audio from playlist..."
-yt-dlp -i -x --audio-format mp3 --output "${audio_directory}/%(title)s.%(ext)s" "$PLAYLIST_URL"
+jq -c '.playlists[]' "$JSON_FILE" | while read -r entry; do
+  url=$(echo "$entry" | jq -r '.url')
+  downloaded=$(echo "$entry" | jq -r '.downloaded')
 
-echo "Download complete. Files saved to: $audio_directory"
-ls "$audio_directory"
+  if [ "$downloaded" = "true" ]; then
+    echo "Skipping already downloaded playlist"
+    continue
+  fi
+
+  echo "Downloading playlist: $url"
+
+  yt-dlp \
+    -i \
+    -x \
+    --audio-format mp3 \
+    --embed-metadata \
+    --embed-thumbnail \
+    --parse-metadata "playlist_index:%(track_number)s" \
+    --output "$BASE_DIR/%(artist|Unknown Artist)s/%(album|Unknown Album)s/%(playlist_index)02d - %(title)s.%(ext)s" \
+    "$url"
+
+  echo "Finished downloading playlist"
+
+  # Mark as downloaded
+  tmp=$(mktemp)
+  jq --arg url "$url" '
+    (.playlists[] | select(.url==$url)).downloaded = true
+  ' "$JSON_FILE" > "$tmp" && mv "$tmp" "$JSON_FILE"
+
+done
